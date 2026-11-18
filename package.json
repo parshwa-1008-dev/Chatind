@@ -13,7 +13,7 @@
     "db:generate": "npm run db:generate -w @chatind/api",
     "db:migrate": "npm run db:migrate -w @chatind/api",
     "db:seed": "npm run db:seed -w @chatind/api",
-    "start": "node server.js"
+    "start": "node apps/api/dist/src/server.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
