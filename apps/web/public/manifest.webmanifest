@@ -1,0 +1,12 @@
+{
+  "name": "Chatind",
+  "short_name": "Chatind",
+  "description": "Conversations that feel closer.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f8f6",
+  "theme_color": "#f6f8f6",
+  "icons": [
+    { "src": "/chatind-icon.svg", "sizes": "any 192x192 512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

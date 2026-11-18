@@ -1,0 +1,182 @@
+openapi: 3.1.0
+info:
+  title: Chatind API
+  version: 1.0.0
+  description: Core account, user discovery, conversation, message and upload endpoints.
+servers:
+  - url: http://localhost:4000
+    description: Local development
+  - url: https://api.example.com
+    description: Replace with the deployed API origin
+security:
+  - accessToken: []
+paths:
+  /health:
+    get:
+      security: []
+      summary: Liveness probe
+      responses:
+        "200":
+          description: API process is responsive
+  /api/auth/register:
+    post:
+      security: []
+      summary: Create an account and issue access/refresh tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, displayName]
+              properties:
+                username: { type: string, minLength: 3, maxLength: 24 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 10, maxLength: 128 }
+                displayName: { type: string, minLength: 1, maxLength: 80 }
+      responses:
+        "201": { description: Account created; refresh token is an HTTP-only cookie }
+        "400": { description: Invalid input }
+        "409": { description: Username or email already exists }
+  /api/auth/login:
+    post:
+      security: []
+      summary: Sign in with username/email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: Signed in; response includes a short-lived access token }
+        "401": { description: Credentials are invalid }
+  /api/auth/refresh:
+    post:
+      security: []
+      summary: Rotate the refresh session and issue a new access token
+      responses:
+        "200": { description: Refreshed session }
+        "401": { description: Refresh cookie is missing or invalid }
+  /api/auth/logout:
+    post:
+      security: []
+      summary: Revoke the current refresh session
+      responses:
+        "204": { description: Session revoked }
+  /api/auth/me:
+    get:
+      summary: Get the authenticated user's profile
+      responses:
+        "200": { description: Current user }
+        "401": { description: Authentication required }
+  /api/users:
+    get:
+      summary: Search user names and usernames
+      parameters:
+        - in: query
+          name: search
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 80 }
+      responses:
+        "200": { description: Matching users }
+  /api/users/me:
+    patch:
+      summary: Update the authenticated user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName: { type: string, maxLength: 80 }
+                about: { type: string, maxLength: 140 }
+                phone: { type: [string, "null"], maxLength: 32 }
+      responses:
+        "200": { description: Updated profile }
+  /api/conversations:
+    get:
+      summary: List conversations the current user belongs to
+      responses:
+        "200": { description: Conversations and latest messages }
+    post:
+      summary: Create a direct or group conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, memberIds]
+              properties:
+                type: { type: string, enum: [DIRECT, GROUP] }
+                title: { type: string, maxLength: 80 }
+                memberIds: { type: array, items: { type: string } }
+      responses:
+        "201": { description: Conversation created }
+        "400": { description: Invalid member list or group title }
+  /api/conversations/{id}/messages:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get the latest messages in a conversation
+      parameters:
+        - in: query
+          name: before
+          schema: { type: string, format: date-time }
+      responses:
+        "200": { description: Messages (maximum 50 per request) }
+        "404": { description: Conversation not found or not accessible }
+    post:
+      summary: Send a text or attachment-reference message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 10000 }
+                type: { type: string, enum: [TEXT, IMAGE, VIDEO, AUDIO, DOCUMENT] }
+                replyToId: { type: string }
+      responses:
+        "201": { description: Message created and broadcast to conversation members }
+        "404": { description: Conversation not found or not accessible }
+  /api/uploads:
+    post:
+      summary: Upload one attachment and post it to a conversation
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, conversationId]
+              properties:
+                file: { type: string, format: binary }
+                conversationId: { type: string }
+      responses:
+        "201": { description: Attachment message created; download URL is short-lived }
+        "400": { description: Unsupported, oversized, or invalid file content }
+        "503": { description: Object storage is not configured }
+components:
+  securitySchemes:
+    accessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
