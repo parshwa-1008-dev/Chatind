@@ -15,6 +15,13 @@
     "db:seed": "npm run db:seed -w @chatind/api"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "node-gyp": "^11.0.0"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.2.0"
   }
 }
