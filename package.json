@@ -12,7 +12,8 @@
     "test": "npm run test -w @chatind/api && npm run test -w @chatind/web",
     "db:generate": "npm run db:generate -w @chatind/api",
     "db:migrate": "npm run db:migrate -w @chatind/api",
-    "db:seed": "npm run db:seed -w @chatind/api"
+    "db:seed": "npm run db:seed -w @chatind/api",
+    "start": "node index.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
