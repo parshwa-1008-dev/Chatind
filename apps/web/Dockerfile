@@ -1,6 +1,6 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-ARG API_BASE_URL=/api
+ARG API_BASE_URL=https://chatind-chatind.up.railway.app/api
 ENV VITE_API_BASE_URL=$API_BASE_URL
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
